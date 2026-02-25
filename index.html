@@ -26,7 +26,6 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <div class="title">
         <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -46,13 +45,11 @@
     const btn = document.getElementById('extractBtn');
     const emailInput = document.getElementById('emailInput');
     const resultBox = document.getElementById('resultBox');
-
-    // LINK WEB APP CỦA BẠN
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxezzI7yJxCvhwkRksSNk3PWzTMXGZMiNDmvocXhcv67uyZtV7vHrYajsVIJ2p6cHsApw/exec";
 
     btn.addEventListener('click', async () => {
         const email = emailInput.value.trim();
-        if (!email) return showResult('error', '[!] ERR: Email cannot be empty.');
+        if (!email) return showResult('error', '[!] ERR: Email field cannot be empty.');
 
         btn.disabled = true;
         btn.innerText = "RUNNING_EXPLOIT [///]...";
@@ -65,18 +62,16 @@
             if (data.status === "success") {
                 showResult('success', `
                     [+] EMAIL: ${email}<br>
-                    [+] TIME: ${data.time}<br>
+                    [+] RECEIVED: ${data.time}<br>
                     <span class="otp-highlight" id="otpCode" title="Click to copy">${data.code}</span>
                     <div style="text-align:center; font-size:10px; opacity:0.5; margin-top:5px;">(Click code to copy)</div>
                 `);
-                
-                // Thêm tính năng click để copy mã OTP
                 document.getElementById('otpCode').onclick = function() {
                     navigator.clipboard.writeText(this.innerText);
                     alert("Copied: " + this.innerText);
                 };
             } else {
-                showResult('error', `[!] FAILED: ${data.message}${data.time ? '<br>[!] Last seen: '+data.time : ''}`);
+                showResult('error', `[!] FAILED: ${data.message}${data.time ? '<br>[!] Last attempt: '+data.time : ''}`);
             }
         } catch (error) {
             showResult('error', `[!] CRITICAL_ERR: ${error.message}`);
