@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIGI43 SECURITY - OTP EXTRACTOR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #0d1117; color: #00ff00;
+            font-family: 'Fira Code', monospace;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px;
+        }
+        .container {
+            border: 1px solid #00ff00; box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+            padding: 40px; border-radius: 4px; width: 100%; max-width: 500px;
+            background-color: #0a0e14;
+        }
+        .title {
+            font-size: 22px; font-weight: 700; text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px;
+        }
+        .title svg {
+            width: 24px; height: 24px; fill: none; stroke: #00ff00;
+            stroke-width: 2; filter: drop-shadow(0 0 5px #00ff00);
+        }
+        hr { border: none; border-top: 1px solid rgba(0, 255, 0, 0.3); margin-bottom: 25px; }
+        .label { font-size: 14px; margin-bottom: 10px; color: #00ff00; opacity: 0.8; }
+        
+        /* PHẦN CHỈNH SỬA Ô NHẬP LIỆU ĐỂ HIỆN RÕ HƠN */
+        .input-wrapper {
+            display: flex; 
+            background: rgba(0, 255, 0, 0.05); /* Nền tối nhẹ */
+            border: 1px solid #00ff00;
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.2), 0 0 10px rgba(0, 255, 0, 0.2);
+            border-radius: 4px;
+            padding: 15px; 
+            margin-bottom: 25px; 
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        .input-wrapper:focus-within {
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            border-width: 2px;
+        }
+        .input-wrapper span { color: #00ff00; margin-right: 12px; font-weight: bold; font-size: 18px; }
+        
+        input {
+            background: transparent; border: none; outline: none; 
+            color: #ffffff; /* Chữ trắng cho dễ đọc */
+            font-family: 'Fira Code', monospace; font-size: 16px; 
+            width: 100%;
+        }
+        input::placeholder { color: rgba(0, 255, 0, 0.3); }
+
+        button {
+            width: 100%; background: transparent; color: #00ff00; border: 1px solid #00ff00;
+            padding: 15px; font-family: 'Fira Code', monospace; font-size: 16px;
+            font-weight: bold; cursor: pointer; transition: all 0.3s ease; letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        button:hover { background: #00ff00; color: #000; box-shadow: 0 0 20px #00ff00; }
+        button:disabled { border-color: #333; color: #333; cursor: not-allowed; box-shadow: none; }
+        
+        .result-box {
+            margin-top: 25px; padding: 15px; border: 1px solid transparent;
+            display: none; font-size: 14px; line-height: 1.5; border-radius: 4px; word-wrap: break-word;
+        }
+        .result-box.error {
+            display: block; border-color: #ff3333; color: #ff3333;
+            background: rgba(255, 51, 51, 0.1); text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
+        }
+        .result-box.success {
+            display: block; border-color: #00ff00; color: #00ff00;
+            background: rgba(0, 255, 0, 0.1); font-size: 16px;
+        }
+        .otp-highlight {
+            font-size: 32px; font-weight: bold; display: block;
+            margin-top: 10px; text-shadow: 0 0 15px #00ff00; color: #fff; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="title">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        OTP_EXTRACTOR_V1.0
+    </div>
+    <hr>
+    
+    <div class="label">> TARGET_EMAIL_ADDRESS</div>
+    <div class="input-wrapper">
+        <span>>_</span>
+        <input type="text" id="emailInput" placeholder="Enter target email..." spellcheck="false">
+    </div>
+
+    <button id="extractBtn">EXTRACT OTP</button>
+
+    <div id="resultBox" class="result-box"></div>
+</div>
+
+<script>
+    const btn = document.getElementById('extractBtn');
+    const emailInput = document.getElementById('emailInput');
+    const resultBox = document.getElementById('resultBox');
+
+    // Link Web App Google Apps Script của bạn
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxezzI7yJxCvhwkRksSNk3PWzTMXGZMiNDmvocXhcv67uyZtV7vHrYajsVIJ2p6cHsApw/exec";
+
+    btn.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        
+        if (!email) {
+            showResult('error', '[!] SYSTEM_ERROR: Email field cannot be empty.');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = "RUNNING_EXPLOIT [///]...";
+        resultBox.style.display = 'none';
+
+        try {
+            const fetchUrl = `${GAS_URL}?email=${encodeURIComponent(email)}`;
+            const response = await fetch(fetchUrl, { method: 'GET' });
+            const data = await response.json();
+
+            if (data.status === "error" || !data.message || data.message.includes("Chưa tìm thấy")) {
+                showResult('error', `[!] FAILED: ${data.message || 'OTP data not found in recent threads.'}`);
+            } else {
+                let otpCode = data.code || data.message; 
+                showResult('success', `[+] DATA_FOUND for: ${email}<br><span class="otp-highlight">${otpCode}</span>`);
+            }
+        } catch (error) {
+            showResult('error', `[!] CRITICAL_ERR: Connection refused by host.<br>Detail: ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "EXTRACT OTP";
+        }
+    });
+
+    function showResult(type, htmlContent) {
+        resultBox.className = `result-box ${type}`;
+        resultBox.innerHTML = htmlContent;
+    }
+</script>
+
+</body>
+</html>
