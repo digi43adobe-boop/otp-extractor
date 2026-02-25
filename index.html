@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DIGI43 SECURITY - OTP EXTRACTOR</title>
+    
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         * { box-sizing: border-box; }
         body { background-color: #0d1117; color: #00ff00; font-family: 'Fira Code', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
@@ -12,7 +15,7 @@
         
         /* CSS cho Logo */
         .logo-wrapper { text-align: center; margin-bottom: 25px; }
-        .logo-wrapper svg { width: 140px; height: auto; filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.3)); }
+        .logo-wrapper img { width: 140px; height: auto; filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.3)); }
 
         .title { font-size: 22px; font-weight: 700; text-shadow: 0 0 10px rgba(0, 255, 0, 0.8); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
         .title svg { width: 24px; height: 24px; stroke: #00ff00; stroke-width: 2; fill: none; }
@@ -32,6 +35,89 @@
 </head>
 <body>
 <div class="container">
+    
     <div class="logo-wrapper">
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2250 2250">
-            <path d="M0 0 C1.17033037 -0.00290688 2.34066073 -0.00581376 3.54645565 -0.00880873 C6.79633971 -0.01485169 10.04607373 -0.01193816 13.29595199 -0.00525283 C16.83138555 -0.00017976 20.36680089 -0.00669921 23.90223187 -0.01173949 C30.09954491 -0.01896623 36.29682311 -0.01874165 42.49413776 -0.01364517 C51.71070725 -0.00608641 60.92724729 -0.00994472 70.14381657 -0.01606179 C86.60910683 -0.0266026 103.07438159 -0.0256762 119.53967333 -0.01990396 C133.96055833 -0.01487339 148.38143764 -0.01355915 162.80232334 -0.01594925 C163.75880724 -0.01610202 164.71529114 -0.01625479 165.7007594 -0.01641219 C169.58362247 -0.01703488 173.46648554 -0.01767168 177.34934861 -0.01833172 C213.79714179 -0.02445341 250.24492511 -0.01889863 286.69271678 -0.00813792 C319.03848522 0.00133921 351.38423791 0.00051659 383.73000622 -0.00905991 C420.08234228 -0.01978667 456.43466961 -0.02400483 492.78700703 -0.01783538 C496.66869938 -0.01719398 500.55039173 -0.0165683 504.43208408 -0.01594925 C505.38782887 -0.01579109 506.34357365 -0.01563294 507.32828039 -0.01546999 C521.7230741 -0.01320082 536.11786147 -0.01584511 550.5126543 -0.02090836 C566.90500137 -0.02664553 583.29733052 -0.02515836 599.68967537 -0.01434687 C608.8491205 -0.00850401 618.00852676 -0.008047
+        <img src="logo.svg" alt="DIGI43 Logo">
+    </div>
+
+    <div class="title">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        OTP_EXTRACTOR_V1.1
+    </div>
+    <hr>
+    <div class="label">> TARGET_EMAIL_ADDRESS (@digi43.net)</div>
+    <div class="input-wrapper">
+        <span>>_</span>
+        <input type="text" id="emailInput" placeholder="username@digi43.net" spellcheck="false">
+    </div>
+    <button id="extractBtn">EXTRACT OTP</button>
+    <div id="resultBox" class="result-box"></div>
+</div>
+
+<script>
+    const btn = document.getElementById('extractBtn');
+    const emailInput = document.getElementById('emailInput');
+    const resultBox = document.getElementById('resultBox');
+
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxezzI7yJxCvhwkRksSNk3PWzTMXGZMiNDmvocXhcv67uyZtV7vHrYajsVIJ2p6cHsApw/exec";
+
+    btn.addEventListener('click', async () => {
+        const email = emailInput.value.trim();
+        if (!email) return showResult('error', '[!] ERR: Email field cannot be empty.');
+
+        btn.disabled = true;
+        btn.innerText = "RUNNING_EXPLOIT [///]...";
+        resultBox.style.display = 'none';
+
+        try {
+            const response = await fetch(`${GAS_URL}?email=${encodeURIComponent(email)}`);
+            const data = await response.json();
+
+            if (data.status === "success") {
+                showResult('success', `
+                    [+] EMAIL: ${email}<br>
+                    [+] RECEIVED: ${data.time}<br>
+                    <span class="otp-highlight" id="otpCode" title="Click to copy">${data.code}</span>
+                    <div style="text-align:center; font-size:10px; opacity:0.5; margin-top:5px;">(Click code to copy)</div>
+                `);
+
+                document.getElementById('otpCode').onclick = function() {
+                    const code = this.innerText;
+                    navigator.clipboard.writeText(code);
+                    
+                    const originalText = btn.innerText;
+                    btn.innerText = "COPIED TO CLIPBOARD!";
+                    btn.style.backgroundColor = "#00ff00";
+                    btn.style.color = "#000";
+                    
+                    setTimeout(() => {
+                        btn.innerText = "EXTRACT OTP";
+                        btn.style.backgroundColor = "transparent";
+                        btn.style.color = "#00ff00";
+                    }, 2000);
+                };
+            } else {
+                showResult('error', `[!] FAILED: ${data.message}${data.time ? '<br>[!] Last attempt: '+data.time : ''}`);
+            }
+        } catch (error) {
+            showResult('error', `[!] CRITICAL_ERR: ${error.message}`);
+        } finally {
+            if (btn.innerText !== "COPIED TO CLIPBOARD!") {
+                btn.disabled = false;
+                btn.innerText = "EXTRACT OTP";
+            } else {
+                setTimeout(() => {
+                    btn.disabled = false;
+                }, 2000);
+            }
+        }
+    });
+
+    function showResult(type, html) {
+        resultBox.className = `result-box ${type}`;
+        resultBox.innerHTML = html;
+        resultBox.style.display = 'block';
+    }
+</script>
+</body>
+</html>
